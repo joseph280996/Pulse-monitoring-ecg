@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime
 from threading import Thread
 from src.routers import record_data
-from src.models.record_data import RecordData
+from src.dtos.record_data import RecordData
 # import board
 # import busio
 # import adafruit_ads1x15.ads1015 as ADS

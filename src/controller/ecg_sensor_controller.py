@@ -25,6 +25,9 @@ class EcgSensorController:
         print(self.__data)
         print(self.__reading_ecg_thread.stopped())
 
+    def get_data(self):
+        return self.__data
+
     def write_data_to_file(self):
         # Serializing jso
         json_object = json.dumps(self.__data, indent=4)
