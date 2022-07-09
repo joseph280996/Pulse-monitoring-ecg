@@ -1,7 +1,6 @@
 from datetime import datetime
 from random import random
 from time import sleep
-
 from src.models.recorded_datum import RecordedDatum
 
 

@@ -2,11 +2,11 @@ import json
 from typing import Sequence
 from src.dependencies.reading_ecg_sensor_data import reading_ecg_sensor_data
 from src.dependencies.stoppable_thread import StoppableThread
-
 from src.models.recorded_datum import RecordedDatum
+import json
 
 
-class EcgSensorController:
+class _EcgSensorController:
     def __init__(self):
         self.status: bool = False
         self.__data: Sequence[Sequence[RecordedDatum]] = [[]]
@@ -22,8 +22,7 @@ class EcgSensorController:
         self.status = False
         if self.__reading_ecg_thread and self.__reading_ecg_thread.is_alive():
             self.__reading_ecg_thread.stop()
-        print(self.__data)
-        print(self.__reading_ecg_thread.stopped())
+        print(f"Thread status: [{self.__reading_ecg_thread.stopped()}]")
 
     def get_data(self):
         return self.__data
@@ -33,3 +32,6 @@ class EcgSensorController:
         json_object = json.dumps(self.__data, indent=4)
         with open("sample.json", "w") as outfile:
             outfile.write(json_object)
+
+
+ecg_sensor_controller = _EcgSensorController()

@@ -1,24 +1,21 @@
-from fastapi import APIRouter
-from src.controller.ecg_sensor_controller import EcgSensorController
-from src.dtos.record_data import RecordData
+from typing import Optional
+from fastapi import APIRouter, Response, status
+from src.factories.record_type_handler_factory import get_record_handler
+from src.dtos.record_dto import RecordDto
 
 router = APIRouter()
-ecg_reading_thread: EcgSensorController = None
 
 
-@router.post("/record/start")
-async def start_recording():
-    global ecg_reading_thread
-    ecg_reading_thread = EcgSensorController()
-    ecg_reading_thread.start_reading_thread()
-    return {"status": "started"}
+@router.post("/record")
+async def recording(record_dto: RecordDto, response: Response):
+    try:
+        handler, response_status = get_record_handler(
+            record_dto.operation_type_id
+        )
+        handler()
 
-
-@router.post("/record/stop")
-async def stop_recording(record_data: RecordData):
-    print(f"Received Request Body: {record_data}")
-    global ecg_reading_thread
-    ecg_reading_thread.stop_reading_thread()
-    print(ecg_reading_thread.status)
-    print("Thread stopped")
-    return {"status": "stopped"}
+        response.status_code = status.HTTP_202_ACCEPTED
+        return {"status": response_status}
+    except AttributeError:
+        response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+        return {"status": "Invalid argument [operation_type_id]"}
