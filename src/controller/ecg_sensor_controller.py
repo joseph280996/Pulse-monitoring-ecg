@@ -2,7 +2,7 @@ import json
 from typing import Sequence
 from src.dependencies.reading_ecg_sensor_data import reading_ecg_sensor_data
 from src.dependencies.stoppable_thread import StoppableThread
-from src.models.recorded_datum import RecordedDatum
+from src.models.recorded_datum import RecordedDatum, RecordedData
 import json
 
 
@@ -23,13 +23,15 @@ class _EcgSensorController:
         if self.__reading_ecg_thread and self.__reading_ecg_thread.is_alive():
             self.__reading_ecg_thread.stop()
         print(f"Thread status: [{self.__reading_ecg_thread.stopped()}]")
+        self.write_data_to_file()
 
     def get_data(self):
         return self.__data
 
     def write_data_to_file(self):
-        # Serializing jso
-        json_object = json.dumps(self.__data, indent=4)
+        # Serializing json
+        model_mapped_data = RecordedData(items=self.__data)
+        json_object = model_mapped_data.json()
         with open("sample.json", "w") as outfile:
             outfile.write(json_object)
 
