@@ -1,7 +1,6 @@
-from typing import Optional
 from fastapi import APIRouter, Response, status
-from src.factories.record_type_handler_factory import get_record_handler
-from src.dtos.record_dto import RecordDto
+from factories.record_type_handler_factory import get_record_handler
+from dtos.record_dto import RecordDto
 
 router = APIRouter()
 
