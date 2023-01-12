@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Response, status
-from factories.record_type_handler_factory import get_record_handler
-from dtos.record_dto import RecordDto
+from application.factories.record_type_handler_factory import get_record_handler
+from application.dtos.record_dto import RecordDto
 
 router = APIRouter()
 

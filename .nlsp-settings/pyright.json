@@ -1,0 +1,10 @@
+{
+  "root_dir": "~/Code/Project/Pulse-monitoring-ecg/",
+  "venvPath": "./venv/",
+  "python": {
+    "venvPath": "C:/Users/josep/Code/Project/Pulse-monitoring-ecg/venv",
+    "analysis": {
+      "stubPath": ""
+    }
+  }
+}

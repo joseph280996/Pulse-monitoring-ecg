@@ -1,13 +1,13 @@
-from domain.service.ecg_sensor_service import EcgSensorService
-from infrastructure.variables.record_operation_types import record_operation_types
+from domain.factories.sensor_service_factory import SensorServiceFactory
+from infrastructure.constants.record_operation_types import record_operation_types
 
+
+service = SensorServiceFactory.get_instance().get_service()
 
 def get_record_handler(operation_type_id: int):
-    print(record_operation_types["START"])
     if operation_type_id == record_operation_types["START"]:
-        return EcgSensorService.get_instance().start_reading_values, "START"
+        return service.get_instance().start_reading_values, "START"
 
-    print(record_operation_types["STOP"])
     if operation_type_id == record_operation_types["STOP"]:
-        return EcgSensorService.get_instance().stop_reading_values, "STOP"
+        return service.get_instance().stop_reading_values, "STOP"
     raise AttributeError("Unsupported record operation type")

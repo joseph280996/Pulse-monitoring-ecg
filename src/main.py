@@ -1,9 +1,9 @@
-from random import random
+import sys
+sys.path.insert(0,'.')
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from datetime import datetime
-from threading import Thread
-from src.routers import record_data
+from application.controllers import record_data_controller
 
 origins = ["http://localhost", "http://localhost:8080"]
 
@@ -17,4 +17,4 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
-app.include_router(record_data.router)
+app.include_router(record_data_controller.router)
