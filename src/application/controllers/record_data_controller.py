@@ -8,9 +8,7 @@ router = APIRouter()
 @router.post("/record")
 async def recording(record_dto: RecordDto, response: Response):
     try:
-        handler, response_status = get_record_handler(
-            record_dto.operation_type_id
-        )
+        handler, response_status = get_record_handler(record_dto.operation_type_id)
         handler()
 
         response.status_code = status.HTTP_202_ACCEPTED

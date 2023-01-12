@@ -3,8 +3,8 @@ import os
 from datetime import datetime
 from time import sleep
 from typing import Sequence
-from models.stoppable_thread import StoppableThread
-from models.recorded_datum import RecordedDatum, RecordedData
+from domain.models.stoppable_thread import StoppableThread
+from domain.models.recorded_datum import RecordedDatum, RecordedData
 import json
 import board
 import busio
@@ -13,10 +13,11 @@ from adafruit_ads1x15.analog_in import AnalogIn
 
 
 class EcgSensorService:
-    __output_path:str = 'output'
+    __output_path: str = "output"
     __instance = None
+    __fileId = 0
 
-    def get_instance(self):
+    def get_instance():
         if not EcgSensorService.__instance:
             EcgSensorService.__instance = EcgSensorService()
         return EcgSensorService.__instance
@@ -24,7 +25,6 @@ class EcgSensorService:
     def __init__(self):
         self.status: bool = False
         self.__data: Sequence[RecordedDatum] = []
-        self.__store_idx: int = 0
 
     def start_reading_values(self):
         self.__create_dir_if_not_exist()
@@ -35,7 +35,6 @@ class EcgSensorService:
             args=(
                 self.__data,
                 self.status,
-                self.__store_idx,
             ),
         )
         self.__reading_ecg_thread.start()
@@ -51,12 +50,13 @@ class EcgSensorService:
         # Serializing json
         model_mapped_data = RecordedData(items=data)
         json_object = model_mapped_data.json()
-        with open("build/sample.json", "w") as outfile:
+        with open("output/sample{}.json".format(self.__fileId), "w") as outfile:
             outfile.write(json_object)
+            self.__fileId += 1
 
-    def __reading_ecg_sensor_data(self, data, status, store_idx):
+    def __reading_ecg_sensor_data(self, data, status):
         while status:
-            if len(data[store_idx]) >= 1000:
+            if len(data) >= 1000:
                 self.write_data_to_file(data)
                 data.clear()
             current_timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -80,4 +80,3 @@ class EcgSensorService:
         is_exist = os.path.exists(self.__output_path)
         if not is_exist:
             os.makedirs(self.__output_path)
-
