@@ -5,6 +5,8 @@ from time import sleep
 from typing import Sequence
 from domain.models.stoppable_thread import StoppableThread
 from domain.models.recorded_datum import RecordedDatum, RecordedData
+from domain.repositories.record_repository import RecordRepository
+from infrastructure.services.file_system_service import FileSystemService
 import json
 import board
 import busio
@@ -13,9 +15,8 @@ from adafruit_ads1x15.analog_in import AnalogIn
 
 
 class EcgSensorService:
-    __output_path: str = "output"
+    __output_path: str = "output/"
     __instance = None
-    __fileId = 0
 
     def get_instance():
         if not EcgSensorService.__instance:
@@ -25,8 +26,10 @@ class EcgSensorService:
     def __init__(self):
         self.status: bool = False
         self.__data: Sequence[RecordedDatum] = []
+        self.__record_repository = RecordRepository.get_instance()
 
     def start_reading_values(self):
+        print("Start Reading ecg values")
         self.__create_dir_if_not_exist()
         self.status = True
         self.__create_bus_connection()
@@ -43,21 +46,17 @@ class EcgSensorService:
         self.status = False
         if self.__reading_ecg_thread and self.__reading_ecg_thread.is_alive():
             self.__reading_ecg_thread.stop()
-        print(f"Thread status: [{self.__reading_ecg_thread.stopped()}]")
-        self.write_data_to_file(self.__data)
 
-    def write_data_to_file(self, data):
-        # Serializing json
-        model_mapped_data = RecordedData(items=data)
-        json_object = model_mapped_data.json()
-        with open("output/sample{}.json".format(self.__fileId), "w") as outfile:
-            outfile.write(json_object)
-            self.__fileId += 1
+        print(f"Thread status: [{self.__reading_ecg_thread.stopped()}]")
+
+        self.__record_repository.create(self.__data)
+        RecordRepository.set_previous_file_id()
 
     def __reading_ecg_sensor_data(self, data, status):
         while status:
             if len(data) >= 1000:
-                self.write_data_to_file(data)
+                print("Start Saving collected data")
+                self.__record_repository.create(self.__data)
                 data.clear()
             current_timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
             data.append(
