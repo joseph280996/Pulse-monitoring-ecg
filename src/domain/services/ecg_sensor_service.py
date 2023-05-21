@@ -1,13 +1,12 @@
-import json
-import os
+from sqlalchemy.orm import Session
+from fastapi import Depends
 from datetime import datetime
 from time import sleep
 from typing import Sequence
 from domain.models.stoppable_thread import StoppableThread
-from domain.models.recorded_datum import RecordedDatum, RecordedData
+from domain.models.recorded_datum import RecordedData
 from domain.repositories.record_repository import RecordRepository
-from infrastructure.services.file_system_service import FileSystemService
-import json
+from infrastructure.services.database import get_db
 import board
 import busio
 import adafruit_ads1x15.ads1015 as ADS
@@ -15,7 +14,6 @@ from adafruit_ads1x15.analog_in import AnalogIn
 
 
 class EcgSensorService:
-    __output_path: str = "output/"
     __instance = None
 
     def get_instance():
@@ -23,44 +21,37 @@ class EcgSensorService:
             EcgSensorService.__instance = EcgSensorService()
         return EcgSensorService.__instance
 
-    def __init__(self):
+    def __init__(self, db:Session = Depends(get_db)):
         self.status: bool = False
-        self.__data: Sequence[RecordedDatum] = []
-        self.__record_repository = RecordRepository.get_instance()
+        self.__data: Sequence[RecordedData] = []
+        self.__db = db
+        self.__record_repository = RecordRepository.get_instance(self.__db)
 
     def start_reading_values(self):
         print("Start Reading ecg values")
-        self.__create_dir_if_not_exist()
         self.status = True
         self.__create_bus_connection()
         self.__reading_ecg_thread = StoppableThread(
             target=self.__reading_ecg_sensor_data,
-            args=(
-                self.__data,
-                self.status,
-            ),
         )
         self.__reading_ecg_thread.start()
 
     def stop_reading_values(self):
-        self.status = False
-        if self.__reading_ecg_thread and self.__reading_ecg_thread.is_alive():
-            self.__reading_ecg_thread.stop()
+        self.__reading_ecg_thread.stop()
 
         print(f"Thread status: [{self.__reading_ecg_thread.stopped()}]")
 
         self.__record_repository.create(self.__data)
-        RecordRepository.set_previous_file_id()
+        self.__data = []
 
-    def __reading_ecg_sensor_data(self, data, status):
-        while status:
-            if len(data) >= 1000:
-                print("Start Saving collected data")
+    def __reading_ecg_sensor_data(self, stop_event):
+        while not stop_event.is_set():
+            if len(self.__data) >= 1000:
                 self.__record_repository.create(self.__data)
-                data.clear()
+                self.__data.clear()
             current_timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
-            data.append(
-                RecordedDatum(
+            self.__data.append(
+                RecordedData(
                     time_stamp=current_timestamp,
                     data=self.chan.value,
                 )
@@ -74,8 +65,3 @@ class EcgSensorService:
         self.ads = ADS.ADS1015(self.i2c)
         # Create single-ended input on channel 0
         self.chan = AnalogIn(self.ads, ADS.P1)
-
-    def __create_dir_if_not_exist(self):
-        is_exist = os.path.exists(self.__output_path)
-        if not is_exist:
-            os.makedirs(self.__output_path)

@@ -1,41 +1,27 @@
-from domain.models.recorded_datum import RecordedData
+import json
+from fastapi import Depends
+from domain.models.recorded_datum import Record
 from infrastructure.services.file_system_service import FileSystemService
+from infrastructure.services.database import get_db
 
 
 class RecordRepository:
     __instance = None
-    __output_path = "output/"
-    __previous_file_id = 0
-    __file_id = 0
 
-    def get_instance():
+    def get_instance(db = Depends(get_db)):
         if not RecordRepository.__instance:
-            RecordRepository.__instance = RecordRepository()
+            RecordRepository.__instance = RecordRepository(db)
 
         return RecordRepository.__instance
 
-    def set_previous_file_id():
-        RecordRepository.__previous_file_id = RecordRepository.__file_id
 
-    def __init__(self):
+    def __init__(self, db = Depends(get_db)):
         self.file_system_service = FileSystemService()
+        self.__db = db
 
     def create(self, data):
-        model_mapped_data = RecordedData(items=data)
-        path = "{0}record{1}.json".format(
-            self.__output_path, RecordRepository.__file_id
-        )
-
-        self.file_system_service.write_data_to_file(model_mapped_data, path)
-        RecordRepository.__file_id += 1
-
-    def get_all_records(self):
-        result_data = list()
-        for file_id in range(
-            RecordRepository.__previous_file_id, RecordRepository.__file_id
-        ):
-            path = "{0}record{1}.json".format(self.__output_path, file_id)
-            data = self.file_system_service.read_data_from_file(path)
-            result_data = result_data + data["items"]
-
-        return result_data
+        stringified_data = json.dumps([item.dict() for item in data])
+        record = Record(data=stringified_data, RecordTypeId = 2)
+        self.__db.add(record)
+        self.__db.commit()
+        self.__db.refresh(record)

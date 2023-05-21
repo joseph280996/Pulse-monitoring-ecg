@@ -5,7 +5,7 @@ from datetime import datetime
 from time import sleep
 from typing import Sequence
 from models.stoppable_thread import StoppableThread
-from models.recorded_datum import RecordedDatum, RecordedData
+from models.recorded_datum import RecordedData
 
 class EcgSensorService:
     __output_path:str = 'output'
@@ -18,7 +18,7 @@ class EcgSensorService:
 
     def __init__(self):
         self.status: bool = False
-        self.__data: Sequence[RecordedDatum] = []
+        self.__data: Sequence[RecordedData] = []
         self.__store_idx: int = 0
 
     def start_reading_values(self):
@@ -55,7 +55,7 @@ class EcgSensorService:
                 data.clear()
             current_timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
             data.append(
-                RecordedDatum(
+                RecordedData(
                     time_stamp=current_timestamp,
                     data=random.random,
                 )
