@@ -22,14 +22,12 @@ class EcgSensorService:
         return EcgSensorService.__instance
 
     def __init__(self, db:Session = Depends(get_db)):
-        self.status: bool = False
         self.__data: Sequence[RecordedData] = []
         self.__db = db
         self.__record_repository = RecordRepository.get_instance(self.__db)
 
     def start_reading_values(self):
         print("Start Reading ecg values")
-        self.status = True
         self.__create_bus_connection()
         self.__reading_ecg_thread = StoppableThread(
             target=self.__reading_ecg_sensor_data,
@@ -42,7 +40,7 @@ class EcgSensorService:
         print(f"Thread status: [{self.__reading_ecg_thread.stopped()}]")
 
         self.__record_repository.create(self.__data)
-        self.__data = []
+        self.__data.clear()
 
     def __reading_ecg_sensor_data(self, stop_event):
         while not stop_event.is_set():
