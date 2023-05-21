@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, String
+from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 
 DATABASE_URL = "mysql+pymysql://pulsemonitoring:Jpxt280996%401406@127.0.0.1:3306/pulsemonitoring"

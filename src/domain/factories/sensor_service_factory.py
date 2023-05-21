@@ -1,9 +1,7 @@
-import os
 import importlib
 
 
 class SensorServiceFactory:
-    # RUNNING_ENV = os.environ["RUNNING_ENV"]
     instance = None
 
     def get_instance():
