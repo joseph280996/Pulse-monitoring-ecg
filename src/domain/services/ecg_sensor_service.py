@@ -12,19 +12,27 @@ import busio
 import adafruit_ads1x15.ads1015 as ADS
 from adafruit_ads1x15.analog_in import AnalogIn
 
+from src.domain.repositories.record_session_repository import RecordSessionRepository
+
 
 class EcgSensorService:
     __instance = None
+    __diagnosis_id = 0
+    __session_id = 0
 
-    def get_instance():
+    def set_diagnosis_id(self, diagnosisId):
+        self.__diagnosis_id =  diagnosisId
+
+    def get_instance(db: Session = Depends(get_db)):
         if not EcgSensorService.__instance:
-            EcgSensorService.__instance = EcgSensorService()
+            EcgSensorService.__instance = EcgSensorService(db)
         return EcgSensorService.__instance
 
     def __init__(self, db:Session = Depends(get_db)):
         self.__data: Sequence[RecordedData] = []
         self.__db = db
-        self.__record_repository = RecordRepository.get_instance(self.__db)
+        self.__record_repository = RecordRepository(self.__db)
+        self.__record_session_repository = RecordSessionRepository(self.__db)
 
     def start_reading_values(self):
         print("Start Reading ecg values")
@@ -32,6 +40,8 @@ class EcgSensorService:
         self.__reading_ecg_thread = StoppableThread(
             target=self.__reading_ecg_sensor_data,
         )
+        new_session = self.__record_session_repository.create(self.__diagnosis_id)
+        self.__session_id = new_session.Id
         self.__reading_ecg_thread.start()
 
     def stop_reading_values(self):
@@ -39,13 +49,13 @@ class EcgSensorService:
 
         print(f"Thread status: [{self.__reading_ecg_thread.stopped()}]")
 
-        self.__record_repository.create(self.__data)
+        self.__record_repository.create(self.__data, )
         self.__data.clear()
 
     def __reading_ecg_sensor_data(self, stop_event):
         while not stop_event.is_set():
             if len(self.__data) >= 1000:
-                self.__record_repository.create(self.__data)
+                self.__record_repository.create(self.__data, self.__diagnosis_id, self.__session_id)
                 self.__data.clear()
             current_timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
             self.__data.append(

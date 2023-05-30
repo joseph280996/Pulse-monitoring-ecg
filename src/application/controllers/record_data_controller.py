@@ -6,14 +6,18 @@ from sqlalchemy.orm import Session
 
 from infrastructure.services.database import get_db
 
-router = APIRouter()
+router = APIRouter(
+    prefix="/record",
+    tags=["record"],
+    responses={404: {"description": "Not found"}}
+)
 
 
 @router.post("/record")
 async def recording(record_dto: RecordDto, response: Response, db: Session = Depends(get_db)):
     try:
-        handler, response_status = get_record_handler(record_dto.operation_type_id)
-        handler(db)
+        handler, response_status = get_record_handler(record_dto.operation_type_id, db)
+        handler()
 
         response.status_code = status.HTTP_202_ACCEPTED
         return {"status": response_status}
