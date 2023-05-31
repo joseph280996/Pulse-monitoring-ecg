@@ -16,9 +16,10 @@ from src.domain.repositories.record_session_repository import RecordSessionRepos
 
 
 class EcgSensorService:
+    is_diagnosis_set = False
     __instance = None
     __diagnosis_id = 0
-    __session_id = 0
+    __session = None
 
     def set_diagnosis_id(self, diagnosisId):
         self.__diagnosis_id =  diagnosisId
@@ -40,8 +41,8 @@ class EcgSensorService:
         self.__reading_ecg_thread = StoppableThread(
             target=self.__reading_ecg_sensor_data,
         )
-        new_session = self.__record_session_repository.create(self.__diagnosis_id)
-        self.__session_id = new_session.Id
+        new_session = self.__record_session_repository.create()
+        self.__session = new_session
         self.__reading_ecg_thread.start()
 
     def stop_reading_values(self):
@@ -54,9 +55,16 @@ class EcgSensorService:
 
     def __reading_ecg_sensor_data(self, stop_event):
         while not stop_event.is_set():
+            if self.is_diagnosis_set:
+                self.is_diagnosis_set = False
+                self.__session.DiagnosisId = self.__diagnosis_id
+                self.__diagnosis_id = 0
+                self.__record_session_repository.save(self.__session)
+
             if len(self.__data) >= 1000:
-                self.__record_repository.create(self.__data, self.__diagnosis_id, self.__session_id)
+                self.__record_repository.create(self.__data, self.__diagnosis_id, self.__session.Id)
                 self.__data.clear()
+
             current_timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
             self.__data.append(
                 RecordedData(

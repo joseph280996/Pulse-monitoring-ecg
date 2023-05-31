@@ -17,6 +17,6 @@ router = APIRouter(
 async def diagnosisCreatedNotify(diagnosis_notify_dto: DiagnosisNotifyDto, response: Response, db: Session = Depends(get_db)):
     service = SensorServiceFactory.get_instance().get_service()
     service_instance = service.get_instance(db)
-    service_instance.__diagnosis_id = diagnosis_notify_dto.id
+    service_instance.__diagnosis_id = diagnosis_notify_dto.diagnosisId
     response.status_code = status.HTTP_200_OK
     return {}
