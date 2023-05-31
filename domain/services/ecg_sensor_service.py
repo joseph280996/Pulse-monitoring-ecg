@@ -1,18 +1,17 @@
 from sqlalchemy.orm import Session
 from fastapi import Depends
-from datetime import datetime
-from time import sleep
+from time import sleep, time
 from typing import Sequence
 from domain.models.stoppable_thread import StoppableThread
 from domain.models.recorded_datum import RecordedData
 from domain.repositories.record_repository import RecordRepository
+from domain.repositories.record_session_repository import RecordSessionRepository
 from infrastructure.services.database import get_db
 import board
 import busio
 import adafruit_ads1x15.ads1015 as ADS
 from adafruit_ads1x15.analog_in import AnalogIn
 
-from src.domain.repositories.record_session_repository import RecordSessionRepository
 
 
 class EcgSensorService:
@@ -50,7 +49,7 @@ class EcgSensorService:
 
         print(f"Thread status: [{self.__reading_ecg_thread.stopped()}]")
 
-        self.__record_repository.create(self.__data, )
+        self.__record_repository.create(self.__data, self.__session.Id)
         self.__data.clear()
 
     def __reading_ecg_sensor_data(self, stop_event):
@@ -62,13 +61,13 @@ class EcgSensorService:
                 self.__record_session_repository.save(self.__session)
 
             if len(self.__data) >= 1000:
-                self.__record_repository.create(self.__data, self.__diagnosis_id, self.__session.Id)
+                self.__record_repository.create(self.__data, self.__session.Id)
                 self.__data.clear()
 
-            current_timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+            current_timestamp = round(time() * 1000)
             self.__data.append(
                 RecordedData(
-                    time_stamp=current_timestamp,
+                    timeStamp=current_timestamp,
                     data=self.chan.value,
                 )
             )

@@ -13,7 +13,7 @@ router = APIRouter(
 )
 
 
-@router.post("/record")
+@router.post("/")
 async def recording(record_dto: RecordDto, response: Response, db: Session = Depends(get_db)):
     try:
         handler, response_status = get_record_handler(record_dto.operation_type_id, db)
@@ -23,10 +23,10 @@ async def recording(record_dto: RecordDto, response: Response, db: Session = Dep
         return {"status": response_status}
     except AttributeError:
         response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
-        return {"status": "Invalid argument [operation_type_id]"}
+        return {"status": "Invalid argument [operation_type_]"}
 
 
-@router.get("/record")
+@router.get("/")
 async def get_records(response: Response):
     try:
         record_repository = RecordRepository.get_instance()

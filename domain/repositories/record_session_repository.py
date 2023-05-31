@@ -1,6 +1,6 @@
 from fastapi import Depends
-from src.domain.models.record_session import RecordSession
-from src.infrastructure.services.database import get_db
+from domain.models.record_session import RecordSession
+from infrastructure.services.database import get_db
 
 class RecordSessionRepository:
     def __init__(self, db = Depends(get_db)):
@@ -8,8 +8,7 @@ class RecordSessionRepository:
 
     def create(self):
         record_session = RecordSession(
-            RecordTypeId = 2,
-            diagnosisId = 0
+            RecordTypeId = 2
         )
         return self.save(record_session)
     

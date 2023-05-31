@@ -1,9 +1,9 @@
 
 from fastapi import APIRouter, Depends, status, Response
 
-from src.application.dtos.diagnosis_notify_dto import DiagnosisNotifyDto
-from src.domain.factories.sensor_service_factory import SensorServiceFactory
-from src.infrastructure.services.database import get_db
+from application.dtos.diagnosis_notify_dto import DiagnosisNotifyDto
+from domain.factories.sensor_service_factory import SensorServiceFactory
+from infrastructure.services.database import get_db
 from sqlalchemy.orm import Session
 
 
