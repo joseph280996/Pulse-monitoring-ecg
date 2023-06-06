@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Response, status, Depends
-from application.factories.record_type_handler_factory import get_record_handler
-from domain.repositories.record_repository import RecordRepository
-from application.dtos.record_dto import RecordDto
+from src.application.factories.record_type_handler_factory import get_record_handler
+from src.domain.repositories.record_repository import RecordRepository
+from src.application.dtos.record_dto import RecordDto
 from sqlalchemy.orm import Session
 
-from infrastructure.services.database import get_db
+from src.infrastructure.services.database import get_db
 
 router = APIRouter(
     prefix="/record",

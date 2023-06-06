@@ -3,7 +3,7 @@ sys.path.insert(0,'.')
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from application.controllers import record_data_controller, diagnosis_notify_controller
+from src.application.controllers import record_data_controller, diagnosis_notify_controller
 
 origins = ["http://localhost", "http://localhost:8080"]
 

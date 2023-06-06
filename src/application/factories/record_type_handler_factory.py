@@ -1,8 +1,8 @@
-from domain.factories.sensor_service_factory import SensorServiceFactory
-from infrastructure.constants.record_operation_types import record_operation_types
+from src.domain.factories.sensor_service_factory import SensorServiceFactory
+from src.infrastructure.constants.record_operation_types import record_operation_types
+from src.infrastructure.services.database import get_db
 from sqlalchemy.orm import Session
 from fastapi import Depends
-from infrastructure.services.database import get_db
 
 def get_record_handler(operation_type_id: int, db:Session = Depends(get_db)):
     service = SensorServiceFactory.get_instance().get_service()

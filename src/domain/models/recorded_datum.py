@@ -1,7 +1,7 @@
 from datetime import datetime
 from pydantic import BaseModel
 from sqlalchemy import Column, DateTime, Integer, Text
-from infrastructure.services.database import Base
+from src.infrastructure.services.database import Base
 
 
 class RecordedData(BaseModel):

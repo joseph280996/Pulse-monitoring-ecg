@@ -14,5 +14,5 @@ class SensorServiceFactory:
         # return importlib.import_module("domain.services", "mock_ecg_sensor_service")
         #            else:
         return importlib.import_module(
-            "domain.services.ecg_sensor_service"
+            "src.domain.services.ecg_sensor_service"
         ).EcgSensorService

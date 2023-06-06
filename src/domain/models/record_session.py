@@ -1,6 +1,6 @@
 from datetime import datetime
 from sqlalchemy import Column, DateTime, Integer, Text
-from infrastructure.services.database import Base
+from src.infrastructure.services.database import Base
 
 class RecordSession(Base):
     __tablename__ = "RecordSession"

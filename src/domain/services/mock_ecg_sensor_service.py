@@ -6,8 +6,8 @@ from models.stoppable_thread import StoppableThread
 from models.recorded_datum import RecordedData
 from fastapi import Depends
 from sqlalchemy.orm import Session
-from domain.repositories.record_repository import RecordRepository
-from infrastructure.services.database import get_db
+from src.domain.repositories.record_repository import RecordRepository
+from src.infrastructure.services.database import get_db
 
 class EcgSensorService:
     __instance = None
