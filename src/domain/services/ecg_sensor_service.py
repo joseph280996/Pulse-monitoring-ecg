@@ -1,7 +1,8 @@
 from sqlalchemy.orm import Session
 from fastapi import Depends
 from time import sleep, time
-from typing import Sequence
+from typing import Optional, Sequence
+from src.domain.models.record_session import RecordSession
 from src.domain.models.stoppable_thread import StoppableThread
 from src.domain.models.recorded_datum import RecordedData
 from src.domain.repositories.record_repository import RecordRepository
@@ -13,22 +14,22 @@ import adafruit_ads1x15.ads1015 as ADS
 from adafruit_ads1x15.analog_in import AnalogIn
 
 
-
 class EcgSensorService:
     is_diagnosis_set = False
+    diagnosis_id = 0
+
     __instance = None
-    __diagnosis_id = 0
-    __session = None
+    __session: Optional[RecordSession] = None
 
     def set_diagnosis_id(self, diagnosisId):
-        self.__diagnosis_id =  diagnosisId
+        self.__diagnosis_id = diagnosisId
 
-    def get_instance(db: Session = Depends(get_db)):
+    def get_instance(self, db: Session = Depends(get_db)):
         if not EcgSensorService.__instance:
             EcgSensorService.__instance = EcgSensorService(db)
         return EcgSensorService.__instance
 
-    def __init__(self, db:Session = Depends(get_db)):
+    def __init__(self, db: Session = Depends(get_db)):
         self.__data: Sequence[RecordedData] = []
         self.__db = db
         self.__record_repository = RecordRepository(self.__db)
@@ -40,8 +41,7 @@ class EcgSensorService:
         self.__reading_ecg_thread = StoppableThread(
             target=self.__reading_ecg_sensor_data,
         )
-        new_session = self.__record_session_repository.create()
-        self.__session = new_session
+        self.__session = self.__record_session_repository.create()
         self.__reading_ecg_thread.start()
 
     def stop_reading_values(self):
@@ -49,29 +49,39 @@ class EcgSensorService:
 
         print(f"Thread status: [{self.__reading_ecg_thread.stopped()}]")
 
-        self.__record_repository.create(self.__data, self.__session.Id)
-        self.__data.clear()
+        self.__record_repository.create(self.__data, self.__get_session_id())
+        self.__data = []
+
+    def __get_session_id(self):
+        session_id = 0
+        if self.__session is not None:
+            session_id = self.__session.Id
+        return session_id
 
     def __reading_ecg_sensor_data(self, stop_event):
         while not stop_event.is_set():
-            if self.is_diagnosis_set:
+            if self.is_diagnosis_set and self.__session is not None:
                 self.is_diagnosis_set = False
-                self.__session.DiagnosisId = self.__diagnosis_id
                 self.__diagnosis_id = 0
-                self.__record_session_repository.save(self.__session)
+                self.__record_session_repository.assign_diagnosis(self.__session)
 
             if len(self.__data) >= 1000:
-                self.__record_repository.create(self.__data, self.__session.Id)
-                self.__data.clear()
+                self.__record_repository.create(self.__data, self.__get_session_id())
+                self.__data = []
 
             current_timestamp = round(time() * 1000)
-            self.__data.append(
+            list(self.__data).append(
                 RecordedData(
                     timeStamp=current_timestamp,
                     data=self.chan.value,
                 )
             )
             sleep(0.01)
+
+    def __get_dianosis_id(self) -> int:
+        if self.__diagnosis_id:
+            return self.__diagnosis_id
+        return 0
 
     def __create_bus_connection(self):
         # Create the I2C busi

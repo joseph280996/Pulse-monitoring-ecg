@@ -1,13 +1,11 @@
 import json
 from fastapi import Depends
 from src.domain.models.recorded_datum import Record
-from src.infrastructure.services.file_system_service import FileSystemService
 from src.infrastructure.services.database import get_db
 
 
 class RecordRepository:
     def __init__(self, db = Depends(get_db)):
-        self.file_system_service = FileSystemService()
         self.__db = db
 
     def create(self, data, record_session_id):

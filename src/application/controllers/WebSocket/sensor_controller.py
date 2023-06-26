@@ -9,5 +9,3 @@ router = APIRouter(
 @router.websocket("/")
 async def recording_handler(websocket: WebSocket):
     await websocket.accept()
-    while True:
-        data = await websocket.receive_text()

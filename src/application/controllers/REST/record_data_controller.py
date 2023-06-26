@@ -2,25 +2,20 @@ from fastapi import APIRouter, Response, status, Depends
 from src.application.factories.record_type_handler_factory import get_record_handler
 from src.domain.repositories.record_repository import RecordRepository
 from src.application.dtos.record_dto import RecordDto
-from sqlalchemy.orm import Session
-
-from src.infrastructure.services.database import get_db
 
 router = APIRouter(
-    prefix="/record",
-    tags=["record"],
-    responses={404: {"description": "Not found"}}
+    prefix="/record", tags=["record"], responses={404: {"description": "Not found"}}
 )
 
 
 @router.post("/")
-async def recording(record_dto: RecordDto, response: Response, db: Session = Depends(get_db)):
+async def recording(record_dto: RecordDto, response: Response):
     try:
-        handler, response_status = get_record_handler(record_dto.operation_type_id, db)
+        handler = get_record_handler(record_dto.operation_type_id)
         handler()
 
         response.status_code = status.HTTP_202_ACCEPTED
-        return {"status": response_status}
+        return {"status": record_dto.operation_type_id}
     except AttributeError:
         response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
         return {"status": "Invalid argument [operation_type_]"}
@@ -29,11 +24,7 @@ async def recording(record_dto: RecordDto, response: Response, db: Session = Dep
 @router.get("/")
 async def get_records(response: Response):
     try:
-        record_repository = RecordRepository.get_instance()
-        records = record_repository.get_all_records()
-
-        response.status_code = status.HTTP_202_ACCEPTED
-        return records
+        raise NotImplemented()
     except AttributeError:
         response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
         return {"status": "Invalid argument [operation_type_id]"}

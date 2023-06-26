@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 
-DATABASE_URL = "mysql+pymysql://pulsemonitoring:Jpxt280996%401406@127.0.0.1:3306/pulsemonitoring"
+DATABASE_URL = "mysql+pymysql://pulsemonitoring:Jpxt280996%401406@192.168.50.251:3306/pulsemonitoring"
 
 engine = create_engine(DATABASE_URL, pool_pre_ping=True)
 
