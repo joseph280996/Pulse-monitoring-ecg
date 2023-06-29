@@ -11,5 +11,7 @@
     {
       "root": "."
     }
-  ]
+  ],
+  "reportOptionalSubscript": false,
+  "reportOptionalMemberAccess": false
 }
