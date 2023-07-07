@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Response, status, Depends
-from src.application.factories.record_type_handler_factory import get_record_handler
 from src.domain.repositories.record_repository import RecordRepository
 from src.application.dtos.record_dto import RecordDto
 

@@ -1,7 +1,5 @@
 from fastapi import APIRouter, WebSocket
-from src.application.factories.record_type_handler_factory import get_record_handler
 from src.infrastructure.constants.record_operation_types import record_operation_types
-from src.domain.factories.sensor_service_factory import SensorServiceFactory
 
 router = APIRouter(
     prefix="/record",
@@ -10,7 +8,7 @@ router = APIRouter(
 )
 
 @router.websocket("/")
-async def recording_handler(websocket: WebSocket, service_factory = SensorServiceFactory()):
+async def recording_handler(websocket: WebSocket):
     await websocket.accept()
     while True:
         data = await websocket.receive_text()
