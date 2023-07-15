@@ -2,7 +2,6 @@ from fastapi import APIRouter, status, Response
 
 from src.application.dtos.diagnosis_notify_dto import DiagnosisNotifyDto
 from src.application.handlers.diagnosis_id_notify_handlers import diagnosis_created_notify_handler
-from src.domain.factories.sensor_service_factory import SensorServiceFactory
 
 
 router = APIRouter(

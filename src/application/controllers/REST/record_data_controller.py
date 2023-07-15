@@ -10,11 +10,9 @@ router = APIRouter(
 @router.post("/")
 async def recording(record_dto: RecordDto, response: Response):
     try:
-        handler = get_record_handler(record_dto.operation_type_id)
-        handler()
 
-        response.status_code = status.HTTP_202_ACCEPTED
-        return {"status": record_dto.operation_type_id}
+        response.status_code = status.HTTP_404_NOT_FOUND
+        return {"status": "Deprecated endpoint"}
     except AttributeError:
         response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
         return {"status": "Invalid argument [operation_type_]"}
@@ -23,7 +21,8 @@ async def recording(record_dto: RecordDto, response: Response):
 @router.get("/")
 async def get_records(response: Response):
     try:
-        raise NotImplemented()
+        response.status_code = status.HTTP_404_NOT_FOUND
+        return {"status": "This features is under development!"}
     except AttributeError:
         response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
         return {"status": "Invalid argument [operation_type_id]"}
