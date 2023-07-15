@@ -1,4 +1,4 @@
-from fastapi import APIRouter, WebSocket
+from fastapi import APIRouter
 from src.application.handlers.websocket_handler import WebSocketHandler
 
 router = APIRouter(
