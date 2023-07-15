@@ -1,5 +1,5 @@
 from fastapi import APIRouter, WebSocket
-from src.infrastructure.constants.record_operation_types import record_operation_types
+from src.application.handlers.websocket_handler import WebSocketHandler
 
 router = APIRouter(
     prefix="/record",
@@ -8,13 +8,6 @@ router = APIRouter(
 )
 
 @router.websocket("/")
-async def recording_handler(websocket: WebSocket):
+async def recording_handler(websocket: WebSocketHandler):
     await websocket.accept()
-    while True:
-        data = await websocket.receive_text()
-        operation_type_id = record_operation_types["STOP"]
-        if data == 'start':
-            operation_type_id = record_operation_types["START"]
 
-        handler = get_record_handler(operation_type_id)
-        handler()
