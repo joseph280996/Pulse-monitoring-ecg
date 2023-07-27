@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Response, status, Depends
+from fastapi import APIRouter, Response, status
 from src.domain.repositories.record_repository import RecordRepository
 from src.application.dtos.record_dto import RecordDto
 
@@ -8,7 +8,7 @@ router = APIRouter(
 
 
 @router.post("/")
-async def recording(record_dto: RecordDto, response: Response):
+async def recording(response: Response):
     try:
 
         response.status_code = status.HTTP_404_NOT_FOUND

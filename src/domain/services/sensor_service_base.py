@@ -3,7 +3,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from fastapi import Depends
 from sqlalchemy.orm import Session
 from time import sleep, time
-from typing import Sequence, Optional
+from typing import List, Sequence, Optional
 from src.domain.models.record_session import RecordSession
 from src.domain.repositories.record_repository import RecordRepository
 from src.domain.repositories.record_session_repository import RecordSessionRepository
@@ -24,7 +24,8 @@ class EcgSensorServiceBase:
         return EcgSensorServiceBase.__instance
 
     def __init__(self, db: Session = Depends(get_db)):
-        self.__data: Sequence[RecordedData] = []
+        self.__data: List[RecordedData] = []
+        self.__secondary_data: List[RecordedData] = []
         self.__db = db
         self.__record_repository = RecordRepository()
         self.__record_session_repository = RecordSessionRepository(self.__db)
@@ -34,6 +35,9 @@ class EcgSensorServiceBase:
         )
 
     def get_data(self):
+        # if __data has less than 20 elements, we get it from the secondary store
+        if len(self.__data) < 20:
+            return (self.__data + self.__secondary_data)[-20:]
         return list(self.__data)
 
     def start_reading_values(self):
@@ -59,8 +63,10 @@ class EcgSensorServiceBase:
             self.diagnosis_id = 0
 
         if len(self.__data) >= 1000:
-            self.__record_repository.create(self.__data, self.__get_session_id())
-            self.__data = []
+            temp = self.__data
+            self.__data = self.__secondary_data
+            self.__secondary_data = temp
+            self.__record_repository.create(self.__secondary_data, self.__get_session_id())
 
         current_timestamp = round(time() * 1000)
         list(self.__data).append(
