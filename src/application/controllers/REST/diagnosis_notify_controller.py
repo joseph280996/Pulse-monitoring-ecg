@@ -12,6 +12,12 @@ router = APIRouter(
 
 @router.post("/notify")
 async def diagnosis_created_notify(diagnosis_notify_dto: DiagnosisNotifyDto, response: Response):
-    diagnosis_created_notify_handler(diagnosis_notify_dto)
-    response.status_code = status.HTTP_200_OK
-    return {}
+    try:
+        diagnosis_created_notify_handler(diagnosis_notify_dto)
+        response.status_code = status.HTTP_200_OK
+    except:
+        print("Error updating diagnosis id")
+        response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+    finally:
+        return {}
+
