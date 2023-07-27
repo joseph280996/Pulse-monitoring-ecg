@@ -1,5 +1,5 @@
 from datetime import datetime
-from sqlalchemy import Column, DateTime, Integer, Text
+from sqlalchemy import Column, DateTime, Integer
 from src.infrastructure.services.database import Base
 
 class RecordSession(Base):
