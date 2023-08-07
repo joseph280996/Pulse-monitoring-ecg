@@ -11,7 +11,7 @@ from src.infrastructure.services.database import get_db
 from models.recorded_datum import RecordedData
 
 
-class EcgSensorServiceBase:
+class EcgSensorManagerBase:
     """The base class of ECG sensor service.
 
     This is the base class of ECG sensor service which has all the main
@@ -41,9 +41,9 @@ class EcgSensorServiceBase:
             The instance of EcgSensorServiceBase and maintain singleton design.
         """
         
-        if not EcgSensorServiceBase.__instance:
-            EcgSensorServiceBase.__instance = EcgSensorServiceBase(db)
-        return EcgSensorServiceBase.__instance
+        if not EcgSensorManagerBase.__instance:
+            EcgSensorManagerBase.__instance = EcgSensorManagerBase(db)
+        return EcgSensorManagerBase.__instance
 
     def __init__(self, db: Session = Depends(get_db)):
         self.__data: List[RecordedData] = []
