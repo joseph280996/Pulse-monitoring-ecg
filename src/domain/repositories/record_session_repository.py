@@ -6,7 +6,7 @@ class RecordSessionRepository:
     def __init__(self, db = Depends(get_db)):
         self.__db = db
 
-    def create(self):
+    def create(self) -> RecordSession:
         record_session = RecordSession(
             RecordTypeId = 2
         )
