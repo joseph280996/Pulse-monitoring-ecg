@@ -1,7 +1,7 @@
 from apscheduler.schedulers.base import STATE_STOPPED
 from fastapi import APIRouter
 from src.application.handlers.websocket_handler import WebSocketHandler
-from src.domain.factories.sensor_service_factory import SensorManagerFactory
+from src.domain.factories.sensor_manager_factory import SensorManagerFactory
 
 router = APIRouter(
     prefix="/record",

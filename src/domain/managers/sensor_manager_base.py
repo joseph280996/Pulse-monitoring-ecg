@@ -25,13 +25,11 @@ class EcgSensorManagerBase:
         diagnosis_id(bool): The Diagnosis Id that was created in Piezo sensor service.
         session(Session): The session that was created when running the scheduler.
     """
-    is_diagnosis_set = False
-    diagnosis_id = 0
-    session: Optional[RecordSession]
-
+    __session: Optional[RecordSession]
     __instance = None
 
-    def get_instance(self, db: Session = Depends(get_db)):
+    @property
+    def instance(self, db: Session = Depends(get_db)):
         """Get the current instance of EcgSensorService
 
         Retrieve or create a new instance of EcgSensorServiceBase for singleton

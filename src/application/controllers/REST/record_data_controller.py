@@ -10,7 +10,6 @@ router = APIRouter(
 @router.post("/")
 async def recording(response: Response):
     try:
-
         response.status_code = status.HTTP_404_NOT_FOUND
         return {"status": "Deprecated endpoint"}
     except AttributeError:

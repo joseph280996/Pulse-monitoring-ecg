@@ -4,7 +4,7 @@ from time import sleep, time
 from typing import Optional
 from src.domain.models.record_session import RecordSession
 from src.domain.models.recorded_datum import RecordedData
-from src.domain.services.sensor_manager_base import EcgSensorManagerBase
+from src.domain.managers.sensor_manager_base import EcgSensorManagerBase
 from src.infrastructure.services.database import get_db
 import board
 import busio
