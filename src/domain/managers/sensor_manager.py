@@ -1,4 +1,6 @@
 import random
+import importlib
+import os
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from fastapi import Depends
 from sqlalchemy.orm import Session
@@ -62,7 +64,7 @@ class EcgSensorManager:
         return EcgSensorManager.__instance
 
     def __init__(
-        self, data_accessor: Optional[SensorDataAccessor] = None, db: Session = Depends(get_db)
+        self, db: Session = Depends(get_db)
     ):
         if EcgSensorManager.__instance is not None:
             raise Exception("Failed to create a new instance because this is a singleton class, please use get_instance instead.")
@@ -71,7 +73,6 @@ class EcgSensorManager:
         self.__secondary_data: List[RecordedData] = []
         self.__db = db
 
-        self.__data_accessor = data_accessor
         self.__record_repository = RecordRepository()
         self.__record_session_repository = RecordSessionRepository(self.__db)
 
@@ -79,6 +80,13 @@ class EcgSensorManager:
         self.__scheduler.add_job(
             self.__reading_ecg_sensor_data, "interval", seconds=0.1, jitter=True
         )
+
+        """Because directly import in development environment will cause an issue, we'll use dynamic import
+        so if the condition is not met, python will not try to import packages that are failed to installed
+        in development environment
+        """
+        if os.getenv("RUNNING_ENV") != "development":
+            self.__data_accessor = importlib.import_module("src.domain.data_accessors.sensor_data_accessor").SensorDataAccessor()
 
     def get_data(self) -> List[RecordedData]:
         """Get the current data in buffer

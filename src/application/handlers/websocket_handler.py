@@ -1,7 +1,7 @@
 from apscheduler.schedulers.base import STATE_STOPPED
 from fastapi import Depends, WebSocket
 from sqlalchemy.orm import Session
-from src.domain.factories.sensor_manager_factory import SensorManagerFactory
+from src.domain.managers.sensor_manager import EcgSensorManager
 from src.infrastructure.services.database import get_db
 
 
@@ -9,7 +9,7 @@ class WebSocketHandler(WebSocket):
     __sensor_service = None
 
     def get_sensor_service(self, db: Session = Depends(get_db)):
-        service_factory = SensorManagerFactory()
+        service_factory = EcgSensorManager()
         if not self.__sensor_service:
             self.__sensor_service = service_factory.get_service().get_instance(db)
         return self.__sensor_service

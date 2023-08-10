@@ -10,6 +10,14 @@ ads = ADS.ADS1015(i2c)
 # Create single-ended input on channel 0
 
 def get_gpio_channel():
+    """Initialize a singleton GPIO channel
+
+    This will create a single connection to GPIO channel for sensor 
+    data retrieving
+
+    Returns: 
+        The GPIO channel for ADS1115 Analog to Digital converter
+    """
     chan = AnalogIn(ads, ADS.P1)
     yield chan
 
