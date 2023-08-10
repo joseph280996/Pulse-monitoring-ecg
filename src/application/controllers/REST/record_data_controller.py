@@ -1,6 +1,8 @@
 from fastapi import APIRouter, Response, status
-from src.domain.repositories.record_repository import RecordRepository
-from src.application.dtos.record_dto import RecordDto
+
+"""
+Legacy code, keep to determine whether to delete or keep
+"""
 
 router = APIRouter(
     prefix="/record", tags=["record"], responses={404: {"description": "Not found"}}

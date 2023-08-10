@@ -12,6 +12,11 @@ router = APIRouter(
 
 @router.post("/notify")
 async def diagnosis_created_notify(diagnosis_notify_dto: DiagnosisNotifyDto, response: Response):
+    """Diagnosis created notify controller
+
+    This function will cascade the received request down to appropriate handler
+    and have top level try catch block to update status code accordingly
+    """
     try:
         diagnosis_created_notify_handler(diagnosis_notify_dto)
         response.status_code = status.HTTP_200_OK
