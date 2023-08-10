@@ -121,7 +121,7 @@ class EcgSensorManager:
         self.set_session(self.__record_session_repository.create())
         self.scheduler.start()
 
-    def stop_reading_values(self) -> None:
+    def stop_reading_values(self, diagnosis_id: int) -> None:
         """Stop the reading sensor values cycle.
 
         Pause the scheduler so that we can start later on.

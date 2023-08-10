@@ -32,10 +32,11 @@ class WebSocketHandler(WebSocket):
             "pause": same as stop
         """
         print(f"Received message: {data}")
-        if data == "start":
+        operation, data = data.split(";")
+        if operation == "start":
             self.__sensor_manager.start_reading_values()
-        if data == "stop":
-            self.__sensor_manager.stop_reading_values()
+        if operation == "stop":
+            self.__sensor_manager.stop_reading_values(int(data))
 
     async def on_disconnect(self, _, close_code):
         """Handle a disconnection to the server
