@@ -124,8 +124,9 @@ class EcgSensorManager:
     def stop_reading_values(self, diagnosis_id: int) -> None:
         """Stop the reading sensor values cycle.
 
-        Pause the scheduler so that we can start later on.
-        Save the recorded data into the database.
+        Pause the scheduler so that we can start later on, save the recorded data into the database,
+        and update RecordSession with the provided DiagnosisId from the front end
+        
         Reset the current read buffer.
         """
         if self.__session is None:
@@ -136,8 +137,12 @@ class EcgSensorManager:
         print(f"Scheduler Paused with status: [{self.scheduler.running}]")
 
         self.__record_repository.create(self.__data, self.__session.Id)
-        self.__data = []
-        self.__secondary_data = []
+
+        self.__session.DiagnosisId = diagnosis_id  #type: ignore
+        self.__record_session_repository.save(self.__session)
+
+        self.__reset_storage()
+
 
     def get_sensor_values(self) -> float:
         """Get the mock sensor value.
@@ -168,3 +173,6 @@ class EcgSensorManager:
                 data=self.get_sensor_values(),
             )
         )
+    def __reset_storage(self):
+        self.__data = []
+        self.__secondary_data = []
