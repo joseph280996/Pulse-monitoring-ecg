@@ -131,17 +131,17 @@ class EcgSensorManager:
         
         Reset the current read buffer.
         """
-        if self.__session is None:
+        if self.session is None:
             raise Exception("Stopping reading sensor value with starting detected.")
 
         self.scheduler.pause()
 
         print(f"Scheduler Paused with status: [{self.scheduler.running}]")
 
-        self.__record_repository.create(self.__data, self.__session.Id)
+        self.__record_repository.create(self.__data, self.session.Id)
 
-        self.__session.DiagnosisId = diagnosis_id  #type: ignore
-        self.__record_session_repository.save(self.__session)
+        self.session.DiagnosisId = diagnosis_id  #type: ignore
+        self.__record_session_repository.save(self.session)
 
         self.__reset_storage()
 
@@ -166,7 +166,7 @@ class EcgSensorManager:
             temp = self.__data
             self.__data = self.__secondary_data
             self.__secondary_data = temp
-            self.__record_repository.create(self.__secondary_data, self.__session.Id)
+            self.__record_repository.create(self.__secondary_data, self.session.Id)
 
         current_timestamp = round(time() * 1000)
         list(self.__data).append(

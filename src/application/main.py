@@ -1,6 +1,3 @@
-import sys
-sys.path.insert(0,'.')
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from src.application.controllers.WebSocket.sensor_controller import router as ws_router
