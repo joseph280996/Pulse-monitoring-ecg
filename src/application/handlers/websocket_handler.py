@@ -6,10 +6,16 @@ class WebSocketHandler(WebSocket):
     """The WebSocket connection and message handler
 
     This class handles any incoming connection, disconnection, and when message came in.
+
+    Attributes:
+        __sensor_manager The sensor data manager
     """
     __sensor_manager = EcgSensorManager.get_instance()
 
     async def on_connect(self, websocket):
+        """The on connect handler
+        Handles accepting any incoming connection
+        """
         await websocket.accept()
 
     async def send_sensor_message(self, websocket: WebSocket):
@@ -27,9 +33,9 @@ class WebSocketHandler(WebSocket):
         This function will received the WebSocket message and decides on action to take
 
         Allowed message and associated actions:
-            "start": will start the sensor reading loop and data transmission loop to the UI
-            "stop": will pause the sensor reading loop and data transmission loop
-            "pause": same as stop
+            "start" will start the sensor reading loop and data transmission loop to the UI
+            "stop"  will pause the sensor reading loop and data transmission loop
+            "pause" same as stop
         """
         print(f"Received message: {data}")
         operation, data = data.split(";")

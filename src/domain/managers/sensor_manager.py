@@ -5,13 +5,12 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from fastapi import Depends
 from sqlalchemy.orm import Session
 from time import time
-from typing import List, Optional
-from src.domain.data_accessors.sensor_data_accessor import SensorDataAccessor
+from typing import List
 from src.domain.models.record_session import RecordSession
+from src.domain.models.recorded_datum import RecordedData
 from src.domain.repositories.record_repository import RecordRepository
 from src.domain.repositories.record_session_repository import RecordSessionRepository
 from src.infrastructure.services.database import get_db
-from models.recorded_datum import RecordedData
 
 
 class EcgSensorManager:
@@ -32,7 +31,7 @@ class EcgSensorManager:
     __session: RecordSession
     __instance = None
     __scheduler: AsyncIOScheduler
-    __data_accessor: Optional[SensorDataAccessor] = None
+    __data_accessor = None
 
     @property
     def session(self) -> RecordSession:
@@ -63,11 +62,11 @@ class EcgSensorManager:
             EcgSensorManager.__instance = EcgSensorManager(db=db)
         return EcgSensorManager.__instance
 
-    def __init__(
-        self, db: Session = Depends(get_db)
-    ):
+    def __init__(self, db: Session = Depends(get_db)):
         if EcgSensorManager.__instance is not None:
-            raise Exception("Failed to create a new instance because this is a singleton class, please use get_instance instead.")
+            raise Exception(
+                "Failed to create a new instance because this is a singleton class, please use get_instance instead."
+            )
 
         self.__data: List[RecordedData] = []
         self.__secondary_data: List[RecordedData] = []
@@ -86,7 +85,9 @@ class EcgSensorManager:
         in development environment
         """
         if os.getenv("RUNNING_ENV") != "development":
-            self.__data_accessor = importlib.import_module("src.domain.data_accessors.sensor_data_accessor").SensorDataAccessor()
+            self.__data_accessor = importlib.import_module(
+                "src.domain.data_accessors.sensor_data_accessor"
+            ).SensorDataAccessor()
 
     def get_data(self) -> List[RecordedData]:
         """Get the current data in buffer
