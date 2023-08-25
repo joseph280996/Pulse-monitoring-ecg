@@ -31,9 +31,9 @@ class WebSocketHandler:
         This function will received the WebSocket message and decides on action to take.
 
         Allowed message and associated actions:
-            "start": will start the sensor reading loop and data transmission loop to the UI.
-            "stop": will pause the sensor reading loop and data transmission loop.
-            "pause": same as stop.
+            "start" will start the sensor reading loop and data transmission loop to the UI
+            "stop"  will pause the sensor reading loop and data transmission loop
+            "pause" same as stop
         """
         try:
             message = await self.__websocket.receive_text()

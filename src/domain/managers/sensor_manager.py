@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 from time import time
 from typing import List
 from src.domain.models.record_session import RecordSession
+from src.domain.models.recorded_datum import RecordedData
 from src.domain.repositories.record_repository import RecordRepository
 from src.domain.repositories.record_session_repository import RecordSessionRepository
 from src.infrastructure.services.database import get_db
@@ -64,11 +65,11 @@ class EcgSensorManager:
             EcgSensorManager.__instance = EcgSensorManager(db=db)
         return EcgSensorManager.__instance
 
-    def __init__(
-        self, db: Session = Depends(get_db)
-    ):
+    def __init__(self, db: Session = Depends(get_db)):
         if EcgSensorManager.__instance is not None:
-            raise Exception("Failed to create a new instance because this is a singleton class, please use get_instance instead.")
+            raise Exception(
+                "Failed to create a new instance because this is a singleton class, please use get_instance instead."
+            )
 
         self.__data: List[RecordedData] = []
         self.__secondary_data: List[RecordedData] = []
