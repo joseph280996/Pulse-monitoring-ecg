@@ -1,6 +1,8 @@
 import random
 import importlib
 import os
+
+from dotenv import load_dotenv
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from fastapi import Depends
 from sqlalchemy.orm import Session
@@ -11,6 +13,7 @@ from src.domain.models.recorded_datum import RecordedData
 from src.domain.repositories.record_repository import RecordRepository
 from src.domain.repositories.record_session_repository import RecordSessionRepository
 from src.infrastructure.services.database import get_db
+from src.domain.models.recorded_datum import RecordedData
 
 
 class EcgSensorManager:
@@ -84,10 +87,9 @@ class EcgSensorManager:
         so if the condition is not met, python will not try to import packages that are failed to installed
         in development environment
         """
-        if os.getenv("RUNNING_ENV") != "development":
-            self.__data_accessor = importlib.import_module(
-                "src.domain.data_accessors.sensor_data_accessor"
-            ).SensorDataAccessor()
+        load_dotenv()
+        if os.getenv("RUNNING_ENV") == "production":
+            self.__data_accessor = importlib.import_module("src.domain.data_accessors.sensor_data_accessor").SensorDataAccessor()
 
     def get_data(self) -> List[RecordedData]:
         """Get the current data in buffer
@@ -125,20 +127,25 @@ class EcgSensorManager:
     def stop_reading_values(self, diagnosis_id: int) -> None:
         """Stop the reading sensor values cycle.
 
-        Pause the scheduler so that we can start later on.
-        Save the recorded data into the database.
+        Pause the scheduler so that we can start later on, save the recorded data into the database,
+        and update RecordSession with the provided DiagnosisId from the front end
+        
         Reset the current read buffer.
         """
-        if self.__session is None:
+        if self.session is None:
             raise Exception("Stopping reading sensor value with starting detected.")
 
         self.scheduler.pause()
 
         print(f"Scheduler Paused with status: [{self.scheduler.running}]")
 
-        self.__record_repository.create(self.__data, self.__session.Id)
-        self.__data = []
-        self.__secondary_data = []
+        self.__record_repository.create(self.__data, self.session.Id)
+
+        self.session.DiagnosisId = diagnosis_id  #type: ignore
+        self.__record_session_repository.save(self.session)
+
+        self.__reset_storage()
+
 
     def get_sensor_values(self) -> float:
         """Get the mock sensor value.
@@ -160,7 +167,7 @@ class EcgSensorManager:
             temp = self.__data
             self.__data = self.__secondary_data
             self.__secondary_data = temp
-            self.__record_repository.create(self.__secondary_data, self.__session.Id)
+            self.__record_repository.create(self.__secondary_data, self.session.Id)
 
         current_timestamp = round(time() * 1000)
         list(self.__data).append(
@@ -169,3 +176,6 @@ class EcgSensorManager:
                 data=self.get_sensor_values(),
             )
         )
+    def __reset_storage(self):
+        self.__data = []
+        self.__secondary_data = []

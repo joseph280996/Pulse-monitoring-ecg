@@ -10,6 +10,17 @@ class RecordedData(BaseModel):
 
 
 class Record(Base):
+    """The Record entity
+
+    The Record entity that represent a single batch of data storage.
+
+    Attributes:
+        Id              Represent the Id of the Record entity
+        data            The batch data storage
+        dateTimeCreated The UTC timestamp record the creation time of Record entity
+        dateTimeUpdated The UTC timestamp record the modification time of Record entity
+        RecordSessionId The Foreign Key reference to the RecordSesion entity
+    """
     __tablename__ = "Record"
 
     Id = Column(Integer, primary_key=True, index=True)

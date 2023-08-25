@@ -1,21 +1,26 @@
 from apscheduler.schedulers.base import STATE_STOPPED
-from fastapi import APIRouter
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from src.application.handlers.websocket_handler import WebSocketHandler
 from src.domain.managers.sensor_manager import EcgSensorManager
 
 router = APIRouter(
-    prefix="/record",
-    tags=["record"],
-    responses={404: {"description": "Not found"}}
+    prefix="/record", tags=["record"], responses={404: {"description": "Not found"}}
 )
 
-@router.websocket("/")
-async def recording_handler(websocket: WebSocketHandler):
+
+@router.websocket("/ws")
+async def recording_handler(websocket: WebSocket):
     """WebSocket Controller
 
     Create an instance of the WebSocket Handler and run it to receive any incoming message
     """
-    await websocket.accept()
+    websocket_handler = WebSocketHandler(websocket)
+    await websocket_handler.on_connect()
+    try:
+        while True:
+            await websocket_handler.on_received()
+    except WebSocketDisconnect:
+        await websocket_handler.on_disconnect()
 
 @router.on_event("shutdown")
 def shutdown_app():

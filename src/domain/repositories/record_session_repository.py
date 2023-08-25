@@ -35,15 +35,3 @@ class RecordSessionRepository:
         self.__db.refresh(record_session)
         return record_session
 
-    def assign_diagnosis_id(self, diagnosis_id: int):
-        """Assign DiagnosisId to all ECG Record type
-
-        Update DiagnosisId of all existing ECG Record type that isn't attached to
-        any Diagnosis.
-
-        Returns:
-            A boolean that indicate the update was executed successfully
-        """
-        query = "UPDATE RecordSession SET DiagnosisId = :diagnosis_id WHERE RecordTypeId = :record_type_id AND DiagnosisId IS NULL;"
-        self.__db.execute(query, {"diagnosis_id": diagnosis_id, "record_type_id": 2})
-        return True
