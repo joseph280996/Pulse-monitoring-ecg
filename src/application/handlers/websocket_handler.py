@@ -46,6 +46,7 @@ class WebSocketHandler:
                     await self.__start_sensor_collection()
                 if operation == "stop":
                     self.__stop_sensor_collection(data)
+
         except Exception as error:
             logging.exception(error)
             await self.__websocket.send_json({"message": str(error)})
