@@ -1,3 +1,4 @@
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from fastapi import WebSocket
 import logging
 from src.application.validators.websocket_message_validators import ws_message_validator
@@ -17,6 +18,10 @@ class WebSocketHandler:
     def __init__(self, websocket: WebSocket):
         self.__websocket = websocket
         self.__sensor_manager = EcgSensorManager.get_instance()
+        self.__scheduler = AsyncIOScheduler()
+        self.__scheduler.add_job(
+            self.__start_sensor_collection, "interval", seconds=0.1, jitter=True
+        )
 
     async def on_connect(self):
         """Handle the websocket connection.
@@ -43,8 +48,10 @@ class WebSocketHandler:
                 operation, data = self.__extract_info_from_message(message)
 
                 if operation == "start":
-                    await self.__start_sensor_collection()
+                    self.__sensor_manager.start_reading_values()
+                    self.__scheduler.start()
                 if operation == "stop":
+                    self.__scheduler.stop()
                     self.__stop_sensor_collection(data)
 
         except Exception as error:
@@ -65,8 +72,7 @@ class WebSocketHandler:
         self.__sensor_manager.stop_reading_values(int(data))
 
     async def __start_sensor_collection(self):
-        self.__sensor_manager.start_reading_values()
-        data = self.__sensor_manager.get_sensor_values()
+        data = self.__sensor_manager.get_single_batch()
         await self.__websocket.send_json(data)
 
     def __extract_info_from_message(self, message: str):

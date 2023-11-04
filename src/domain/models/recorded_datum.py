@@ -27,4 +27,4 @@ class Record(Base):
     data = Column(Text)
     dateTimeCreated = Column(DateTime, default=datetime.utcnow)
     dateTimeUpdated = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    RecordSessionId = Column(Integer, nullable=True)
+    RecordTypeId = Column(Integer, nullable=False)

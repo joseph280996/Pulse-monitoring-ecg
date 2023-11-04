@@ -13,7 +13,7 @@ class RecordRepository:
     def __init__(self, db = Depends(get_db)):
         self.__db = db
 
-    def create(self, data, record_session_id):
+    def create(self, data, record_type_id):
         """Create Record
 
         Convert the received data to a JSON string and creating a new Record in the database
@@ -24,7 +24,7 @@ class RecordRepository:
         stringified_data = json.dumps([item.dict() for item in data])
         record = Record(
             data=stringified_data,
-            RecordSessionId= record_session_id
+            RecordSessionId= record_type_id
         )
         self.__db.add(record)
         self.__db.commit()

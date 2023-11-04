@@ -31,19 +31,9 @@ class EcgSensorManager:
         session(Session): The session that was created when running the scheduler.
     """
 
-    __session: RecordSession
     __instance = None
     __scheduler: AsyncIOScheduler
     __data_accessor = None
-
-    @property
-    def session(self) -> RecordSession:
-        """The current record session"""
-        return self.__session
-
-    @session.setter
-    def set_session(self, session: RecordSession):
-        self.__session = session
 
     @property
     def scheduler(self) -> AsyncIOScheduler:
@@ -76,7 +66,6 @@ class EcgSensorManager:
         self.__db = db
 
         self.__record_repository = RecordRepository()
-        self.__record_session_repository = RecordSessionRepository(self.__db)
 
         self.__scheduler = AsyncIOScheduler()
         self.__scheduler.add_job(
@@ -89,7 +78,7 @@ class EcgSensorManager:
         """
         load_dotenv()
         if os.getenv("RUNNING_ENV") == "production":
-            self.__data_accessor = importlib.import_module("src.domain.data_accessors.sensor_data_accessor").SensorDataAccessor()
+            self.__data_accessor = importlib.import_module("src.domain.data_accessors.sensor_data_accessor").SensorDataAccessdr()
 
     def get_data(self) -> List[RecordedData]:
         """Get the current data in buffer
@@ -121,7 +110,6 @@ class EcgSensorManager:
         in interval.
         """
 
-        self.set_session(self.__record_session_repository.create())
         self.scheduler.start()
 
     def stop_reading_values(self, diagnosis_id: int) -> None:
@@ -132,17 +120,13 @@ class EcgSensorManager:
         
         Reset the current read buffer.
         """
-        if self.session is None:
-            raise Exception("Stopping reading sensor value with starting detected.")
-
         self.scheduler.pause()
 
         print(f"Scheduler Paused with status: [{self.scheduler.running}]")
 
-        self.__record_repository.create(self.__data, self.session.Id)
+        self.__record_repository.create(self.__data, 2)
 
         self.session.DiagnosisId = diagnosis_id  #type: ignore
-        self.__record_session_repository.save(self.session)
 
         self.__reset_storage()
 
@@ -162,12 +146,26 @@ class EcgSensorManager:
 
         return random.random()
 
+
+    def get_single_batch(self):
+        """Get a single batch of data for commucation to the front end.
+
+        Retrieve the data from primary storage.
+        Merge with secondary storage if needed to get enough data.
+
+        Returns: 
+            A list of 20 records 
+        """
+        if len(self.__data) < 20 and len(self.__secondary_data) > 0:
+            return (self.__data + self.__secondary_data)[-20:]
+        return self.__data[-20:]
+
     def __reading_ecg_sensor_data(self):
         if len(self.__data) >= 1000:
             temp = self.__data
             self.__data = self.__secondary_data
             self.__secondary_data = temp
-            self.__record_repository.create(self.__secondary_data, self.session.Id)
+            self.__record_repository.create(self.__secondary_data, 2)
 
         current_timestamp = round(time() * 1000)
         list(self.__data).append(
